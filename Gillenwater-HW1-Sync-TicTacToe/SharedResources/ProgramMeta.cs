@@ -11,8 +11,8 @@ namespace SharedResources
         private const string COURSE = "CSCI-5150-940";
         private const string ASSIGNMENT = "Homework 1 : Synchronous Tic-Tac-Toe";
 
-        public static string getProgramHeaderInfo() {
-            return string.Join("/n", AUTHOR, DEPARTMENT, COURSE, ASSIGNMENT);
+        public static string GetProgramHeaderInfo() {
+            return string.Join(Environment.NewLine, AUTHOR, DEPARTMENT, COURSE, ASSIGNMENT);
         }
     }
 }
