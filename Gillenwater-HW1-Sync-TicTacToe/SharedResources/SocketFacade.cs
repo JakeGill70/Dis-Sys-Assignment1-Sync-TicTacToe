@@ -18,8 +18,8 @@ namespace SharedResources
         public SocketFacade(int port)
         {
             this.port = port;
-            establishLocalEndpoint();
-            createSocket();
+            EstablishLocalEndpoint();
+            CreateSocket();
         }
 
         private SocketFacade(Socket s) {
@@ -28,42 +28,42 @@ namespace SharedResources
             this.port = endPoint?.Port ?? -1;
         }
 
-        public string getIpAddress() {
+        public string GetIpAddress() {
             return ipAddress.ToString();
         }
 
-        public string getEndPoint() {
+        public string GetEndPoint() {
             return endPoint.ToString();
         }
 
-        private void establishLocalEndpoint() {
+        public void EstablishLocalEndpoint() {
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             ipAddress = ipHostInfo.AddressList[0];
             endPoint = new IPEndPoint(ipAddress, port);
         }
 
-        private void createSocket() {
+        private void CreateSocket() {
             socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         }
 
-        private void bindSocket() {
+        public void BindSocket() {
             socket.Bind(endPoint);
         }
 
-        private void listenForIncomingConnections() {
+        public void ListenForIncomingConnections() {
             socket.Listen(MAX_CONNECTION_QUEUE_SIZE);
         }
 
-        private void connectToEndPoint() {
+        public void ConnectToEndPoint() {
             socket.Connect(endPoint);
         }
 
-        private SocketFacade acceptIncomingConnection() {
+        public SocketFacade AcceptIncomingConnection() {
             Socket handler = socket.Accept();
             return (new SocketFacade(handler));
         }
 
-        private string readData(int bufferSize = 1024){
+        public string ReadData(int bufferSize = 1024){
             byte[] bytesBuffer = new byte[bufferSize];
             string data = string.Empty;
 
@@ -81,7 +81,7 @@ namespace SharedResources
             return data;
         }
 
-        private bool sendData(string message) {
+        public bool SendData(string message) {
             bool sentSuccessfully = true;
             try
             {
@@ -101,7 +101,7 @@ namespace SharedResources
             return sentSuccessfully;
         }
 
-        private void closeConnection() {
+        public void CloseConnection() {
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
         }
