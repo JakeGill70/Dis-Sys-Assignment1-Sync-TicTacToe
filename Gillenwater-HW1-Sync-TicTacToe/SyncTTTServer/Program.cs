@@ -12,6 +12,7 @@ namespace SyncTTTServer
         {
             Console.WriteLine(ProgramMeta.getProgramHeaderInfo());
 
+
             // 1. Allocate a buffer to store incoming data
             byte[] bytesBuffer = new byte[1024];
             string data;

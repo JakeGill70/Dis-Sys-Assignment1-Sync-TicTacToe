@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharedResources
 {
-    class SocketFacade
+    public class SocketFacade
     {
         // Used for creating the socket
         private IPAddress ipAddress;
