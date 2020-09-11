@@ -26,6 +26,7 @@ namespace SharedResources
             this.endPoint = s.LocalEndPoint as IPEndPoint;
             this.ipAddress = endPoint?.Address;
             this.port = endPoint?.Port ?? -1;
+            this.socket = s;
         }
 
         public string GetIpAddress() {
@@ -69,11 +70,19 @@ namespace SharedResources
 
             while (true)
             {
-                int bytesReceived = this.socket.Receive(bytesBuffer);
-                data += Encoding.ASCII.GetString(bytesBuffer, 0, bytesReceived);
-                // Exit loop when the delimer "<EOF>" comes in
-                if (data.IndexOf("<EOF>") > -1)
+                try
                 {
+                    int bytesReceived = this.socket.Receive(bytesBuffer);
+                    data += Encoding.ASCII.GetString(bytesBuffer, 0, bytesReceived);
+                    // Exit loop when the delimer "<EOF>" comes in
+                    if (data.IndexOf("<EOF>") > -1)
+                    {
+                        break;
+                    }
+                }
+                catch (Exception e){
+                    Console.Error.WriteLine("The bad stuff happened while receiving bytes.");
+                    Console.Error.WriteLine(e);
                     break;
                 }
             }
@@ -102,8 +111,8 @@ namespace SharedResources
         }
 
         public void CloseConnection() {
-            socket.Shutdown(SocketShutdown.Both);
-            socket.Close();
+            socket?.Shutdown(SocketShutdown.Both);
+            socket?.Close();
         }
     }
 }
