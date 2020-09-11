@@ -11,37 +11,41 @@ namespace SyncTTTServer
 
         public static void BetterMain(string[] args) {
 
-            Console.WriteLine(ProgramMeta.getProgramHeaderInfo());
+            Console.WriteLine(ProgramMeta.GetProgramHeaderInfo());
 
+            SocketFacade listener = null;
 
             // Establish a server connection point
             try
             {
-                SocketFacade socket = new SocketFacade(SharedResources.ProgramMeta.PORT_NUMBER);
-                socket.EstablishLocalEndpoint();
-                socket.BindSocket();
-                socket.ListenForIncomingConnections();
+                listener = new SocketFacade(SharedResources.ProgramMeta.PORT_NUMBER);
+                
+                listener.BindSocket();
+                listener.ListenForIncomingConnections();
 
                 while (true) {
                     // Listen for incoming connections
-                    socket.AcceptIncomingConnection();
-                    string requestData = socket.ReadData();
+                    SocketFacade handler = listener.AcceptIncomingConnection();
+                    string requestData = handler.ReadData();
 
                     // Process Data
                     // Display the data
                     Console.WriteLine("Text received : {0}", requestData);
 
                     // Echo data back to the client
-                    socket.SendData("ReqRec: " + requestData);
+                    handler.SendData("ReqRec: " + requestData);
 
                     // Close the connection
-                    socket.CloseConnection();
+                    handler.CloseConnection();
                 }
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine("An error occured while trying to establish the server connection point.");
+                Console.Error.WriteLine(e);
             }
+
+            listener?.CloseConnection();
 
             Console.WriteLine("\nPress ENTER to exit...");
             Console.ReadLine();
