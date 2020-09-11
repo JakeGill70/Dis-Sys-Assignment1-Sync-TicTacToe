@@ -50,6 +50,8 @@ namespace SyncTTTServer
         static void Main(string[] args)
         {
             Console.WriteLine(ProgramMeta.getProgramHeaderInfo());
+            // Set console window name
+            Console.Title = "Server";
 
 
             // 1. Allocate a buffer to store incoming data

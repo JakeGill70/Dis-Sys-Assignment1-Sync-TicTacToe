@@ -10,6 +10,10 @@ namespace SyncTTTClient
     {
         static void Main(string[] args)
         {
+
+            // Set console window name
+            Console.Title = "Client";
+
             // 1. Allocate a buffer to store incoming data
             byte[] bytesBuffer = new byte[1024];
             string data;
