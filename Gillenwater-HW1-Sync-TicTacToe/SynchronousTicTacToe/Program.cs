@@ -28,16 +28,7 @@ namespace SyncTTTClient
                 // Create a socket representing the connection to the server
                 sender = new SocketFacade(SharedResources.ProgramMeta.PORT_NUMBER);
                 sender.ConnectToEndPoint();
-
-                // 6. Send the data through the socket
-                sender.SendData("This is a rock test.");
-
-                // 7. Listen for  the response (blocking call)
-                string requestData = sender.ReadData();
-
-                // Process Data
-                // Display the data
-                Console.WriteLine("Text received : {0}", requestData);
+                
 
             }
             catch (Exception e)
@@ -56,6 +47,25 @@ namespace SyncTTTClient
             // Wait for user input before closing the window
             Console.WriteLine("\nPress ENTER to exit...");
             Console.ReadLine();
+        }
+
+        private static void SetPlayerCharacter(SocketFacade serverSocket) {
+            string serverResponse = String.Empty;
+
+            while (!serverResponse.Equals("200"))
+            {
+                // 6. Send the data through the socket
+                serverResponse = serverSocket.ReadData();
+                if (!serverResponse.Equals("200"))
+                {
+                    Console.WriteLine(serverResponse);
+                    serverSocket.SendData(Console.ReadLine());
+                }
+            }
+        }
+
+        private static void PlayGame(SocketFacade serverSocket) {
+            SetPlayerCharacter(serverSocket);
         }
     }
 }

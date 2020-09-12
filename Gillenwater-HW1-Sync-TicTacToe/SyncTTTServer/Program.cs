@@ -58,13 +58,14 @@ namespace SyncTTTServer
 
         public static char GetPlayerCharacter(SocketFacade playerSocket) {
             string playerResponse = string.Empty;
-            do
+            while (!(playerResponse.Equals("X", StringComparison.OrdinalIgnoreCase) || playerResponse.Equals("O", StringComparison.OrdinalIgnoreCase)))
             {
                 // Ask the player if they want to be an X or an O
                 playerSocket.SendData("Welcome to the Tic-Tac-Server. Are you playing X or O?");
                 playerResponse = playerSocket.ReadData();
             }
-            while (playerResponse.Equals("X", StringComparison.OrdinalIgnoreCase) || playerResponse.Equals("O", StringComparison.OrdinalIgnoreCase));
+
+            playerSocket.SendData("200");
 
             char playerCharacter;
             playerCharacter = playerResponse.ToUpper()[0];
@@ -143,6 +144,9 @@ namespace SyncTTTServer
                 // Switch turns
                 playerTurn = (playerTurn == 'O' ? 'X' : 'O');
 
+                // Send a display of the new game state
+                playerSocket.SendData(gameBoard.ToString());
+
                 // Make moves
                 if (playerTurn == playerCharacter)
                 {
@@ -154,8 +158,6 @@ namespace SyncTTTServer
                     boardState = TicTacToeAi.AiMove(gameBoard, playerTurn);
                 }
 
-                // Send a display of the new game state
-                playerSocket.SendData(gameBoard.ToString());
             }
 
             //  Send a display of the final results
