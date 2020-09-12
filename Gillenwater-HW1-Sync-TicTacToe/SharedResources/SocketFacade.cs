@@ -15,6 +15,8 @@ namespace SharedResources
 
         private const int MAX_CONNECTION_QUEUE_SIZE = 10;
 
+        const string END_OF_FIELD = "<EOF>"; // Used to indicate the end of a message
+
         public SocketFacade(int port)
         {
             this.port = port;
@@ -75,7 +77,7 @@ namespace SharedResources
                     int bytesReceived = this.socket.Receive(bytesBuffer);
                     data += Encoding.ASCII.GetString(bytesBuffer, 0, bytesReceived);
                     // Exit loop when the delimer "<EOF>" comes in
-                    if (data.IndexOf("<EOF>") > -1)
+                    if (data.IndexOf(END_OF_FIELD) > -1)
                     {
                         break;
                     }
@@ -86,7 +88,8 @@ namespace SharedResources
                     break;
                 }
             }
-
+            // Remove the <EOF> tag
+            data = data.Substring(0, data.Length - END_OF_FIELD.Length);
             return data;
         }
 
@@ -94,7 +97,7 @@ namespace SharedResources
             bool sentSuccessfully = true;
             try
             {
-                message += "<EOF>";
+                message += END_OF_FIELD;
                 byte[] msg = Encoding.ASCII.GetBytes(message);
                 socket.Send(msg);
             }
