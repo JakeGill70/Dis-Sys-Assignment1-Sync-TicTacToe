@@ -42,8 +42,6 @@ namespace SyncTTTServer
                     // Echo data back to the client
                     handler.SendData("ReqRec: " + requestData);
 
-                    // Close the connection
-                    handler.CloseConnection();
                 }
             }
             catch (Exception e)
@@ -53,9 +51,11 @@ namespace SyncTTTServer
                 Console.Error.WriteLine("An error occured while trying to establish the server connection point.");
                 Console.Error.WriteLine(e);
             }
+            finally {
+                // Close the connection
+                listener?.CloseConnection();
+            }
 
-            // Close the connection
-            listener?.CloseConnection();
 
             // Wait for user input before closing the window
             Console.WriteLine("\nPress ENTER to exit...");
