@@ -51,7 +51,8 @@ namespace SyncTTTServer
                 Console.Error.WriteLine("An error occured while trying to establish the server connection point.");
                 Console.Error.WriteLine(e);
             }
-            finally {
+            finally
+            {
                 // Close the connection
                 listener?.CloseConnection();
             }
@@ -62,5 +63,6 @@ namespace SyncTTTServer
             Console.ReadLine();
 
         }
+    }
 }
 
