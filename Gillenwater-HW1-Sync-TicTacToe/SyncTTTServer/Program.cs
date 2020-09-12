@@ -56,7 +56,8 @@ namespace SyncTTTServer
 
         }
 
-        public static char GetPlayerCharacter(SocketFacade playerSocket) {
+        // Send prompts to the player to determine if they want to be an X or an O
+        private static char GetPlayerCharacter(SocketFacade playerSocket) {
             string playerResponse = string.Empty;
             while (!(playerResponse.Equals("X", StringComparison.OrdinalIgnoreCase) || playerResponse.Equals("O", StringComparison.OrdinalIgnoreCase)))
             {
@@ -94,7 +95,7 @@ namespace SyncTTTServer
         }
 
         // Communicate with the client to facilitate the player's move
-        public static char PlayerMove(TicTacToeBoard gameBoard, char playerTurn, SocketFacade playerSocket) {
+        private static char PlayerMove(TicTacToeBoard gameBoard, char playerTurn, SocketFacade playerSocket) {
             bool placementWasSuccessful = false;
             String[] positionInput;
             int row;
@@ -123,7 +124,7 @@ namespace SyncTTTServer
             return gameBoard.ReportResult();
         }
 
-        public static void PlayGame(SocketFacade playerSocket) {
+        private static void PlayGame(SocketFacade playerSocket) {
             // Create Game Board
             TicTacToeBoard gameBoard = new TicTacToeBoard();
 
