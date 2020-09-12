@@ -114,8 +114,15 @@ namespace SharedResources
         }
 
         public void CloseConnection() {
-            socket?.Shutdown(SocketShutdown.Both);
-            socket?.Close();
+            try
+            {
+                socket?.Shutdown(SocketShutdown.Both);
+                socket?.Close();
+            }
+            catch (SocketException se) {
+                Console.Error.WriteLine($"Cannot close connection (Local: {socket?.LocalEndPoint}, Remote: {socket?.RemoteEndPoint}) because the connection has already been closed somewhere else.");
+                Console.Error.WriteLine(se);
+            }
         }
     }
 }
