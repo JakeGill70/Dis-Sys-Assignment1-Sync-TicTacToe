@@ -8,14 +8,14 @@ namespace SharedResources
     public class SocketFacade
     {
         // Used for creating the socket
-        private IPAddress ipAddress;
-        private int port;
-        private IPEndPoint endPoint;
-        private Socket socket;
+        internal IPAddress ipAddress;
+        internal int port;
+        internal IPEndPoint endPoint;
+        internal Socket socket;
 
-        private const int MAX_CONNECTION_QUEUE_SIZE = 10;
+        internal const int MAX_CONNECTION_QUEUE_SIZE = 10;
 
-        const string END_OF_FIELD = "<EOF>"; // Used to indicate the end of a message
+        public const string END_OF_FIELD = "<EOF>"; // Used to indicate the end of a message
 
         public SocketFacade(int port)
         {
@@ -24,7 +24,7 @@ namespace SharedResources
             CreateSocket();
         }
 
-        private SocketFacade(Socket s) {
+        internal SocketFacade(Socket s) {
             this.endPoint = s.LocalEndPoint as IPEndPoint;
             this.ipAddress = endPoint?.Address;
             this.port = endPoint?.Port ?? -1;
@@ -39,7 +39,7 @@ namespace SharedResources
             return endPoint.ToString();
         }
 
-        public void EstablishLocalEndpoint() {
+        private void EstablishLocalEndpoint() {
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             ipAddress = ipHostInfo.AddressList[0];
             endPoint = new IPEndPoint(ipAddress, port);
@@ -47,23 +47,6 @@ namespace SharedResources
 
         private void CreateSocket() {
             socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-        }
-
-        public void BindSocket() {
-            socket.Bind(endPoint);
-        }
-
-        public void ListenForIncomingConnections() {
-            socket.Listen(MAX_CONNECTION_QUEUE_SIZE);
-        }
-
-        public void ConnectToEndPoint() {
-            socket.Connect(endPoint);
-        }
-
-        public SocketFacade AcceptIncomingConnection() {
-            Socket handler = socket.Accept();
-            return (new SocketFacade(handler));
         }
 
         public string ReadData(int bufferSize = 1024){
