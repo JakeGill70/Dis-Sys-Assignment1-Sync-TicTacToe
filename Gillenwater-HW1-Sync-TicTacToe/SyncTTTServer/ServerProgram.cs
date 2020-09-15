@@ -103,6 +103,7 @@ namespace SyncTTTServer
 
             // Tell the player that it is their move
             playerSocket.SendData(ProgramMeta.PLAYER_MOVE);
+            GetPermissionForDataDelivery(playerSocket);
 
             // Make sure that the user has entered a valid position on the game board
             while (!placementWasSuccessful)
@@ -131,9 +132,14 @@ namespace SyncTTTServer
             return gameBoard.ReportResult();
         }
 
+        private static bool GetPermissionForDataDelivery(SocketFacade playerSocket) { 
+            string messageFromSocket = playerSocket.ReadData(); // Wait for a message to procede
+            return messageFromSocket.Equals(ProgramMeta.PROCEDE_WITH_DELIVERY);
+        }
 
         private static void SendGameBoard(TicTacToeBoard gameBoard, SocketFacade playerSocket) {
             playerSocket.SendData(ProgramMeta.GAMEBOARD_INCOMING);
+            GetPermissionForDataDelivery(playerSocket);
             playerSocket.SendData(gameBoard.ToString());
         }
 
@@ -176,6 +182,7 @@ namespace SyncTTTServer
 
             //  Send a display of the final results
             playerSocket.SendData(ProgramMeta.GAME_RESULTS_INCOMING);
+            GetPermissionForDataDelivery(playerSocket);
             playerSocket.SendData(boardState.ToString());
         }
     }

@@ -14,6 +14,7 @@ namespace SharedResources
         public const string GAMEBOARD_INCOMING = "100"; // HTTP Continue
         public const string PLAYER_MOVE = "402"; // HTTP Payment Required
         public const string GAME_RESULTS_INCOMING = "205"; // HTTP Reset Content
+        public const string PROCEDE_WITH_DELIVERY = "200"; // HTTP Ok
 
         private const string AUTHOR = "Jake Gillenwater";
         private const string DEPARTMENT = "ETSU Department of Computing";

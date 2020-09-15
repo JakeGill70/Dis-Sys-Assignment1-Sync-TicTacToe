@@ -74,6 +74,7 @@ namespace SyncTTTClient
             while (true) {
                 // Get instructions from the server
                 string serverInstructions = serverSocket.ReadData();
+                serverSocket.SendData(ProgramMeta.PROCEDE_WITH_DELIVERY);
 
                 if (serverInstructions.Equals(ProgramMeta.GAMEBOARD_INCOMING))
                 {
