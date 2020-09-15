@@ -28,8 +28,10 @@ namespace SyncTTTClient
                 // Create a socket representing the connection to the server
                 sender = new SocketFacade(SharedResources.ProgramMeta.PORT_NUMBER);
                 sender.ConnectToEndPoint();
-                
 
+                PlayGame(sender);
+
+                Console.WriteLine("Thanks for playing!");
             }
             catch (Exception e)
             {
@@ -52,11 +54,11 @@ namespace SyncTTTClient
         private static void SetPlayerCharacter(SocketFacade serverSocket) {
             string serverResponse = String.Empty;
 
-            while (!serverResponse.Equals("200"))
+            while (!serverResponse.Equals(ProgramMeta.INPUT_ACCEPTED))
             {
                 // 6. Send the data through the socket
                 serverResponse = serverSocket.ReadData();
-                if (!serverResponse.Equals("200"))
+                if (!serverResponse.Equals(ProgramMeta.INPUT_ACCEPTED))
                 {
                     Console.WriteLine(serverResponse);
                     serverSocket.SendData(Console.ReadLine());
@@ -65,7 +67,65 @@ namespace SyncTTTClient
         }
 
         private static void PlayGame(SocketFacade serverSocket) {
+            // Set the character that the human player would like to play as: X or O
+            // I.e. Communicate with the server to tell it what the human client wants to play as
             SetPlayerCharacter(serverSocket);
+
+            while (true) {
+                // Get instructions from the server
+                string serverInstructions = serverSocket.ReadData();
+                if (serverInstructions.Equals(ProgramMeta.GAMEBOARD_INCOMING))
+                {
+                    DisplayGameBoard(serverSocket);
+                }
+                else if (serverInstructions.Equals(ProgramMeta.PLAYER_MOVE)) {
+                    PlayerMove(serverSocket);
+                }
+                else if (serverInstructions.Equals(ProgramMeta.GAME_RESULTS_INCOMING))
+                {
+                    DisplayResults(serverSocket);
+                    break;
+                }
+            }
+        }
+
+        private static void DisplayGameBoard(SocketFacade serverSocket) {
+            string gameBoardString = serverSocket.ReadData();
+            Console.WriteLine(gameBoardString);
+        }
+
+        private static void PlayerMove(SocketFacade serverSocket) {
+            string serverResponse = String.Empty;
+
+            while (!serverResponse.Equals(ProgramMeta.INPUT_ACCEPTED))
+            {
+                // 6. Send the data through the socket
+                serverResponse = serverSocket.ReadData();
+                if (!serverResponse.Equals(ProgramMeta.INPUT_ACCEPTED))
+                {
+                    Console.WriteLine(serverResponse);
+                    serverSocket.SendData(Console.ReadLine());
+                }
+            }
+        }
+
+        private static void DisplayResults(SocketFacade serverSocket) {
+            try
+            {
+                char finalResult = serverSocket.ReadData()[0];
+
+                if(finalResult == 'D')
+                {
+                     Console.WriteLine("No Winner.");
+                }
+                else
+                {
+                    Console.WriteLine(finalResult + " Wins!");
+                }
+            }
+            catch (IndexOutOfRangeException ie) {
+                Console.Error.WriteLine("The server sent an empty string back as the final results of the game.");
+            }
         }
     }
 }
