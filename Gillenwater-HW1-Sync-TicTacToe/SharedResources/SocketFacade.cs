@@ -120,7 +120,7 @@ namespace SharedResources
                 socket?.Close();
             }
             catch (SocketException se) {
-                Console.Error.WriteLine($"Cannot close connection (Local: {socket?.LocalEndPoint}, Remote: {socket?.RemoteEndPoint}) because the connection has already been closed somewhere else.");
+                Console.Error.WriteLine($"Cannot close connection because the connection has already been closed somewhere else.");
                 Console.Error.WriteLine(se);
             }
         }
