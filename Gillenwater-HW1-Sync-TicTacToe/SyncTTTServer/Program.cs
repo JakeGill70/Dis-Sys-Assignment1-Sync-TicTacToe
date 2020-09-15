@@ -66,7 +66,7 @@ namespace SyncTTTServer
                 playerResponse = playerSocket.ReadData();
             }
 
-            playerSocket.SendData("200");
+            playerSocket.SendData(ProgramMeta.INPUT_ACCEPTED);
 
             char playerCharacter;
             playerCharacter = playerResponse.ToUpper()[0];
@@ -101,6 +101,9 @@ namespace SyncTTTServer
             int row;
             int column;
 
+            // Tell the player that it is their move
+            playerSocket.SendData(ProgramMeta.PLAYER_MOVE);
+
             // Make sure that the user has entered a valid position on the game board
             while (!placementWasSuccessful)
             {
@@ -114,14 +117,26 @@ namespace SyncTTTServer
                     row = int.Parse(positionInput[0]);
                     column = int.Parse(positionInput[1]);
                 }
-                catch (IndexOutOfRangeException e)
+                catch (IndexOutOfRangeException ie)
+                {
+                    continue;
+                }
+                catch (FormatException fe)
                 {
                     continue;
                 }
                 // Attempt to place the game piece
                 placementWasSuccessful = AttemptToPlaceGamePieceOntoBoard(gameBoard, playerTurn, row, column);
             }
+
+            playerSocket.SendData(ProgramMeta.INPUT_ACCEPTED);
+
             return gameBoard.ReportResult();
+        }
+
+        private static void SendGameBoard(TicTacToeBoard gameBoard, SocketFacade playerSocket) {
+            playerSocket.SendData(ProgramMeta.GAMEBOARD_INCOMING);
+            playerSocket.SendData(gameBoard.ToString());
         }
 
         private static void PlayGame(SocketFacade playerSocket) {
@@ -146,7 +161,7 @@ namespace SyncTTTServer
                 playerTurn = (playerTurn == 'O' ? 'X' : 'O');
 
                 // Send a display of the new game state
-                playerSocket.SendData(gameBoard.ToString());
+                SendGameBoard(gameBoard, playerSocket);
 
                 // Make moves
                 if (playerTurn == playerCharacter)
