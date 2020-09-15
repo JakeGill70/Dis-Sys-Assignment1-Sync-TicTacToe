@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SyncTTTServer
 {
-    class Program
+    class ServerProgram
     {
 
         static void Main(string[] args)
@@ -117,12 +117,9 @@ namespace SyncTTTServer
                     row = int.Parse(positionInput[0]);
                     column = int.Parse(positionInput[1]);
                 }
-                catch (IndexOutOfRangeException ie)
+                catch (Exception e)
                 {
-                    continue;
-                }
-                catch (FormatException fe)
-                {
+                    // If any problem occurs while deciphering the number, just try again on the next loop around
                     continue;
                 }
                 // Attempt to place the game piece
@@ -133,6 +130,7 @@ namespace SyncTTTServer
 
             return gameBoard.ReportResult();
         }
+
 
         private static void SendGameBoard(TicTacToeBoard gameBoard, SocketFacade playerSocket) {
             playerSocket.SendData(ProgramMeta.GAMEBOARD_INCOMING);
@@ -177,6 +175,7 @@ namespace SyncTTTServer
             }
 
             //  Send a display of the final results
+            playerSocket.SendData(ProgramMeta.GAME_RESULTS_INCOMING);
             playerSocket.SendData(boardState.ToString());
         }
     }

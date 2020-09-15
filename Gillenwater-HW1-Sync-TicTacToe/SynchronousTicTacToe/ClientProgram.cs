@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SyncTTTClient
 {
-    class Program
+    class ClientProgram
     {
 
         static void Main(string[] args)
@@ -74,6 +74,7 @@ namespace SyncTTTClient
             while (true) {
                 // Get instructions from the server
                 string serverInstructions = serverSocket.ReadData();
+
                 if (serverInstructions.Equals(ProgramMeta.GAMEBOARD_INCOMING))
                 {
                     DisplayGameBoard(serverSocket);
