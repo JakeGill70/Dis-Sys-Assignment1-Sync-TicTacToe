@@ -19,13 +19,13 @@ namespace SyncTTTServer
 
             // Declare outside of the try-catch a new socket that will
             // be used to represent the connection point to the server.
-            SocketFacade listener = null;
+            ServerSocket listener = null;
 
             // Establish a server connection point
             try
             {
                 // Create a socket representing the connection point to the server.
-                listener = new SocketFacade(SharedResources.ProgramMeta.PORT_NUMBER);
+                listener = new ServerSocket(SharedResources.ProgramMeta.PORT_NUMBER);
                 listener.BindSocket();
                 listener.ListenForIncomingConnections();
 

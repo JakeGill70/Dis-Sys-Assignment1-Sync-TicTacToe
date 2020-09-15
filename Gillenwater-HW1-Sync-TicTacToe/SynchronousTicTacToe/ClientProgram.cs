@@ -20,13 +20,13 @@ namespace SyncTTTClient
 
             // Declare outside of the try-catch a new socket that will
             // be used to reach out to the server
-            SocketFacade sender = null;
+            ClientSocket sender = null;
 
             // Establish a connection to the server
             try
             {
                 // Create a socket representing the connection to the server
-                sender = new SocketFacade(SharedResources.ProgramMeta.PORT_NUMBER);
+                sender = new ClientSocket(SharedResources.ProgramMeta.PORT_NUMBER);
                 sender.ConnectToEndPoint();
 
                 PlayGame(sender);
