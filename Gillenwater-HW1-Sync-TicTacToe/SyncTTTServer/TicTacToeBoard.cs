@@ -1,4 +1,10 @@
-﻿using System;
+﻿// Code recycled from Spring 2020 V&V lab.
+// Code originally authored by Jake Gillenwater.
+// Design specifications were originally outlined by Jeff Roach.
+// The code and subsequent documentation was written according to 
+// the standards of the course at the time.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 

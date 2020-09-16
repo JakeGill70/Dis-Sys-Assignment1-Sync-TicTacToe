@@ -56,7 +56,12 @@ namespace SyncTTTServer
 
         }
 
-        // Send prompts to the player to determine if they want to be an X or an O
+        /// <summary>
+        /// Communicates with the Client Program to negotiate a symbol for the human player.
+        /// Sends a prompt to the player to ask if they want to be an X or an O.
+        /// The server enforces input validation.
+        /// </summary>
+        /// <param name="serverSocket">A reference to the Socket Facade connecting to the client.</param>
         private static char GetPlayerCharacter(SocketFacade playerSocket) {
             string playerResponse = string.Empty;
             while (!(playerResponse.Equals("X", StringComparison.OrdinalIgnoreCase) || playerResponse.Equals("O", StringComparison.OrdinalIgnoreCase)))

@@ -51,6 +51,11 @@ namespace SyncTTTClient
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// Communicates with the Server Program to negotiate a symbol for the human player.
+        /// The server enforces input validation.
+        /// </summary>
+        /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
         private static void SetPlayerCharacter(SocketFacade serverSocket) {
             string serverResponse = String.Empty;
 
@@ -66,6 +71,11 @@ namespace SyncTTTClient
             }
         }
 
+        /// <summary>
+        /// Negotiates a character for the human player, then waits on instructions
+        /// from the server to facilitate a game of tic-tac-toe.
+        /// </summary>
+        /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
         private static void PlayGame(SocketFacade serverSocket) {
             // Set the character that the human player would like to play as: X or O
             // I.e. Communicate with the server to tell it what the human client wants to play as
@@ -91,17 +101,29 @@ namespace SyncTTTClient
             }
         }
 
+        /// <summary>
+        /// Retrieves the tic-tac-toe game board from the server as a string,
+        /// then immediaitely displays it to the screen.
+        /// </summary>
+        /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
         private static void DisplayGameBoard(SocketFacade serverSocket) {
             string gameBoardString = serverSocket.ReadData();
             Console.WriteLine(gameBoardString);
         }
 
+        /// <summary>
+        /// Negotiates a move for the human player.
+        /// The server handles input validation. 
+        /// This function will loop infinately until the server approves of the human
+        /// player's input.
+        /// </summary>
+        /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
         private static void PlayerMove(SocketFacade serverSocket) {
             string serverResponse = String.Empty;
 
             while (!serverResponse.Equals(ProgramMeta.INPUT_ACCEPTED))
             {
-                // 6. Send the data through the socket
+                // Send the data through the socket
                 serverResponse = serverSocket.ReadData();
                 if (!serverResponse.Equals(ProgramMeta.INPUT_ACCEPTED))
                 {
@@ -111,6 +133,11 @@ namespace SyncTTTClient
             }
         }
 
+        /// <summary>
+        /// Communicates with the tic-tac-toe server to get the final result of the game,
+        /// then immediately prints that result to the console.
+        /// </summary>
+        /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
         private static void DisplayResults(SocketFacade serverSocket) {
             try
             {
