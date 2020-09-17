@@ -32,8 +32,10 @@ namespace SyncTTTServer
                 while (true)
                 {
                     // Listen for incoming connections
+                    // This is a blocking call
                     SocketFacade handler = listener.AcceptIncomingConnection();
 
+                    // Play a game of tic-tac-toe against the entity that connected
                     PlayGame(handler);
                 }
             }
@@ -79,16 +81,24 @@ namespace SyncTTTServer
             return playerCharacter;
         }
 
-        // Attempts to place an X or an O onto the gameboard
-        // Returns True if successful, False if the space was occupied (failure)
-        private static bool AttemptToPlaceGamePieceOntoBoard(TicTacToeBoard gameBoard, char player, int row, int column)
+        
+        /// <summary>
+        /// Attempts to place an X or an O onto the gameboard.
+        /// Returns True if successful, False if the space was occupied (failure)
+        /// </summary>
+        /// <param name="gameBoard">The tic-tac-toe board to place the piece onto</param>
+        /// <param name="playerTurn">Symbol to be placed - must be either an 'X' or an 'O'</param>
+        /// <param name="row">The row on the board to place the piece.</param>
+        /// <param name="column">The column on the board to place the piece.</param>
+        /// <returns></returns>
+        private static bool AttemptToPlaceGamePieceOntoBoard(TicTacToeBoard gameBoard, char playerTurn, int row, int column)
         {
             bool placementWasSuccessful = false;
-            if (player == 'X')
+            if (playerTurn == 'X')
             {
                 placementWasSuccessful = gameBoard.InsertX(row, column);
             }
-            else if (player == 'O')
+            else if (playerTurn == 'O')
             {
                 placementWasSuccessful = gameBoard.InsertO(row, column);
             }
@@ -100,6 +110,13 @@ namespace SyncTTTServer
         }
 
         // Communicate with the client to facilitate the player's move
+        /// <summary>
+        /// Communicate with the client connection to place the remote player's game piece.
+        /// </summary>
+        /// <param name="gameBoard">The tic-tac-toe board to place the piece onto</param>
+        /// <param name="playerTurn">Symbol to be placed - must be either an 'X' or an 'O'</param>
+        /// <param name="playerSocket">The remote socket connected to the client player.</param>
+        /// <returns>The resulting state of the gameBoard after the player has placed their piece.</returns>
         private static char PlayerMove(TicTacToeBoard gameBoard, char playerTurn, SocketFacade playerSocket) {
             bool placementWasSuccessful = false;
             String[] positionInput;
@@ -132,22 +149,41 @@ namespace SyncTTTServer
                 placementWasSuccessful = AttemptToPlaceGamePieceOntoBoard(gameBoard, playerTurn, row, column);
             }
 
+            // Inform the client that the input was accepted.
             playerSocket.SendData(ProgramMeta.INPUT_ACCEPTED);
 
             return gameBoard.ReportResult();
         }
 
+        /// <summary>
+        /// Blocking call that waits for a confirmation message from the remote client player.
+        /// </summary>
+        /// <param name="playerSocket">The remote socket connected to the client player.</param>
+        /// <returns>True if the remote client approved the delivery of the rest of the data.</returns>
         private static bool GetPermissionForDataDelivery(SocketFacade playerSocket) { 
             string messageFromSocket = playerSocket.ReadData(); // Wait for a message to procede
             return messageFromSocket.Equals(ProgramMeta.PROCEDE_WITH_DELIVERY);
         }
 
+        /// <summary>
+        /// Sends a string representation of the tic-tac-toe game board to the remote client player.
+        /// </summary>
+        /// <param name="gameBoard">The tic-tac-toe board to place the piece onto</param>
+        /// <param name="playerSocket">The remote socket connected to the client player.</param>
         private static void SendGameBoard(TicTacToeBoard gameBoard, SocketFacade playerSocket) {
             playerSocket.SendData(ProgramMeta.GAMEBOARD_INCOMING);
             GetPermissionForDataDelivery(playerSocket);
             playerSocket.SendData(gameBoard.ToString());
         }
 
+        /// <summary>
+        /// Initializes and walks through a game of tic-tac-toe with a remote client player.
+        /// This function accepts a client connection as input, then initializes a new game
+        /// of tic-tac-toe, lets the player choose their symbol, then procedes to play the game
+        /// until either the remote client player or a server-side AI system wins, or the game
+        /// is declared a draw.
+        /// </summary>
+        /// <param name="playerSocket">The remote socket connected to the client player.</param>
         private static void PlayGame(SocketFacade playerSocket) {
             // Create Game Board
             TicTacToeBoard gameBoard = new TicTacToeBoard();
