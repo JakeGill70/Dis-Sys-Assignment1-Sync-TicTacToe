@@ -232,5 +232,34 @@ namespace SyncTTTServer
             return board;
         }
 
+        public string EncodeToString() {
+            StringBuilder sb = new StringBuilder();
+            var b = _board;
+            sb.Append(b[0,0]);
+            sb.Append(b[0,1]);
+            sb.Append(b[0,2]);
+            sb.Append(b[1, 0]);
+            sb.Append(b[1, 1]);
+            sb.Append(b[1, 2]);
+            sb.Append(b[2, 0]);
+            sb.Append(b[2, 1]);
+            sb.Append(b[2, 2]);
+            return sb.ToString();
+        }
+
+        public void DecodeFromString(string boardEncodedString)
+        {
+            char[] s = boardEncodedString.ToCharArray();
+            var b = _board;
+            b[0, 0] = s[0];
+            b[0, 1] = s[1];
+            b[0, 2] = s[2];
+            b[1, 0] = s[3];
+            b[1, 1] = s[4];
+            b[1, 2] = s[5];
+            b[2, 0] = s[6];
+            b[2, 1] = s[7];
+            b[2, 2] = s[8];
+        }
     }
 }
