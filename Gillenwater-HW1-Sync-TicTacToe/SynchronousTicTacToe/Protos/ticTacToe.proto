@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcTicTacToeServer";
+
+package ticTacToe;
+
+// The greeting service definition.
+service TicTacToe {
+  // Sends a greeting
+  rpc SetPlayerCharacter (SetPlayerRequest) returns (SetPlayerReply);
+  rpc PlayerTurn (PlayerTurnRequest) returns (PlayerTurnRequest);
+  rpc ServerTurn (ServerTurnRequest) returns (ServerTurnReply);
+}
+
+message SetPlayerRequest {
+    string requestedPlayerPiece = 1;
+}
+
+message SetPlayerReply {
+    bool inputWasAccepted = 1;
+    string playerCharacter_c = 2;
+    string message = 3;
+}
+
+message PlayerTurnRequest{
+    string gameBoard = 1;
+    string playerTurn_c = 2;
+    int32 row = 3;
+    int32 column = 4;
+}
+
+message PlayerTurnReply {
+    bool inputWasAccepted = 1;
+    string gameBoard = 2;
+    string turnResult_c = 3;
+    string message = 4;
+}
+
+message ServerTurnRequest{
+    string gameBoard = 1;
+    string playerTurn_c = 2;
+}
+
+message ServerTurnReply{
+    string gameBoard = 1;
+    string turnResult_c = 2;
+    string message = 3;
+}
+
