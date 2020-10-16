@@ -35,7 +35,11 @@ namespace SyncTTTClient
 
             try
             {
+                // Start the game loop
+                //! Warning: PlayGame() access the Console directly to read/write/clear
                 session?.PlayGame();
+
+                // Clean up resources
                 session?.Dispose();
 
                 Console.WriteLine("Thanks for playing!");
