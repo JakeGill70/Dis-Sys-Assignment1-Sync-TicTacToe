@@ -1,10 +1,6 @@
 ﻿using Grpc.Net.Client;
 using GrpcTicTacToeServer;
-using SharedResources;
 using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
 
 namespace SyncTTTClient
 {

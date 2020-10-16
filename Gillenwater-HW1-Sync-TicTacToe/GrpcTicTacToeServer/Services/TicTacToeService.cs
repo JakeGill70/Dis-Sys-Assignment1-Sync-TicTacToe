@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
-using SyncTTTServer;
 
 namespace GrpcTicTacToeServer
 {

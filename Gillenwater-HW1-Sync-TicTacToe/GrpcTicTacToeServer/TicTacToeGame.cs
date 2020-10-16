@@ -1,6 +1,4 @@
-﻿using SyncTTTServer;
-
-namespace GrpcTicTacToeServer
+﻿namespace GrpcTicTacToeServer
 {
     public struct TicTacToeGame {
         public string playerID;

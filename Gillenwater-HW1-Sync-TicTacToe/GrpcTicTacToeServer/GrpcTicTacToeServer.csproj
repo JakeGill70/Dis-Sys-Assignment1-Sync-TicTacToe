@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharedResources\SharedResources.csproj" />
-    <ProjectReference Include="..\SyncTTTServer\SyncTTTServer.csproj" />
   </ItemGroup>
 
 </Project>

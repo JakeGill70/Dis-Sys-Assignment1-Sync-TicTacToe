@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using SharedResources;
 
 namespace GrpcTicTacToeServer
 {
@@ -16,6 +13,12 @@ namespace GrpcTicTacToeServer
     {
         public static void Main(string[] args)
         {
+            // Set console window name
+            Console.Title = "Server";
+
+            // Display some house keeping information
+            Console.WriteLine(ProgramMeta.GetProgramHeaderInfo());
+
             CreateHostBuilder(args).Build().Run();
         }
 
