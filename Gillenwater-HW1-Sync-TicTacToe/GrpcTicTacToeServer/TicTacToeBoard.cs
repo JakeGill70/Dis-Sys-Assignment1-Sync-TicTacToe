@@ -5,8 +5,6 @@
 // the standards of the course at the time.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GrpcTicTacToeServer
 {
