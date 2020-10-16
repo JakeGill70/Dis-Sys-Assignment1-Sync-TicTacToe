@@ -1,4 +1,6 @@
-﻿using SharedResources;
+﻿using Grpc.Net.Client;
+using GrpcTicTacToeServer;
+using SharedResources;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -18,18 +20,14 @@ namespace SyncTTTClient
             // Display some house keeping information
             Console.WriteLine(ProgramMeta.GetProgramHeaderInfo());
 
-            // Declare outside of the try-catch a new socket that will
-            // be used to reach out to the server
-            ClientSocket sender = null;
-
             // Establish a connection to the server
+            TicTacToe.TicTacToeClient ticTacToeServer;
             try
             {
-                // Create a socket representing the connection to the server
-                sender = new ClientSocket(SharedResources.ProgramMeta.PORT_NUMBER);
-                sender.ConnectToEndPoint();
+                using var channel = GrpcChannel.ForAddress("https://localhost:5001");
+                ticTacToeServer = new TicTacToe.TicTacToeClient(channel);
 
-                PlayGame(sender);
+                PlayGame(ticTacToeServer);
 
                 Console.WriteLine("Thanks for playing!");
             }
@@ -37,13 +35,8 @@ namespace SyncTTTClient
             {
                 // Catch exceptions thrown inside the main server loop so that the program
                 // will fail gracefully
-                Console.Error.WriteLine("An error occured while trying to establish the server connection point.");
+                Console.Error.WriteLine("An error occured while trying to establish a connection to the server.");
                 Console.Error.WriteLine(e);
-            }
-            finally
-            {
-                // Close the connection
-                sender?.CloseConnection();
             }
 
             // Wait for user input before closing the window
@@ -55,50 +48,71 @@ namespace SyncTTTClient
         /// Communicates with the Server Program to negotiate a symbol for the human player.
         /// The server enforces input validation.
         /// </summary>
-        /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
-        private static void SetPlayerCharacter(SocketFacade serverSocket) {
-            string serverResponse = String.Empty;
+        /// <param name="server">A reference to the Socket Facade connecting to the server.</param>
+        /// <returns>The player's ID for this game session</returns>
+        private static string  StartNewGame(TicTacToe.TicTacToeClient server) {
+            bool isInputAcceptable = false;
+            SetPlayerRequest request = new SetPlayerRequest() { RequestedPlayerPiece="N"};
+            SetPlayerReply reply = server.SetPlayerCharacter(request);
 
-            while (!serverResponse.Equals(ProgramMeta.INPUT_ACCEPTED))
+            while (!isInputAcceptable)
             {
-                // 6. Send the data through the socket
-                serverResponse = serverSocket.ReadData();
-                if (!serverResponse.Equals(ProgramMeta.INPUT_ACCEPTED))
-                {
-                    Console.WriteLine(serverResponse);
-                    serverSocket.SendData(Console.ReadLine());
-                }
+                Console.WriteLine(reply.Message);
+                request.RequestedPlayerPiece = Console.ReadLine();
+                reply = server.SetPlayerCharacter(request);
+                isInputAcceptable = reply.InputWasAccepted;
             }
+
+            return reply.Message;
         }
 
         /// <summary>
         /// Negotiates a character for the human player, then waits on instructions
         /// from the server to facilitate a game of tic-tac-toe.
         /// </summary>
-        /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
-        private static void PlayGame(SocketFacade serverSocket) {
+        /// <param name="server">A reference to the Socket Facade connecting to the server.</param>
+        private static void PlayGame(TicTacToe.TicTacToeClient server) {
             // Set the character that the human player would like to play as: X or O
             // I.e. Communicate with the server to tell it what the human client wants to play as
-            SetPlayerCharacter(serverSocket);
+            string myId = StartNewGame(server);
+            ResultReply gameStateResult;
 
             while (true) {
                 // Get instructions from the server
-                string serverInstructions = serverSocket.ReadData();
-                serverSocket.SendData(ProgramMeta.PROCEDE_WITH_DELIVERY);
+                gameStateResult = server.GetResult(new ResultRequest() { PlayerId = myId });
 
-                if (serverInstructions.Equals(ProgramMeta.GAMEBOARD_INCOMING))
+                ClearScreen();
+                DisplayGameBoard(server, myId);
+
+                if (IsGameOver(gameStateResult))
                 {
-                    DisplayGameBoard(serverSocket);
-                }
-                else if (serverInstructions.Equals(ProgramMeta.PLAYER_MOVE)) {
-                    PlayerMove(serverSocket);
-                }
-                else if (serverInstructions.Equals(ProgramMeta.GAME_RESULTS_INCOMING))
-                {
-                    DisplayResults(serverSocket);
+                    DisplayResults(server, myId);
                     break;
                 }
+                else if (IsPlayerTurn(gameStateResult))
+                {
+                    PlayerMove(server, myId);
+                }
+                else if (IsServerTurn(gameStateResult))
+                {
+                    Console.WriteLine("The server is making its turn...");
+                    server.ServerTurn(new ServerTurnRequest() { PlayerId = myId });
+                }
             }
+        }
+
+        private static bool IsGameOver(ResultReply gameState) {
+            return !(gameState.ResultC.Equals("N"));
+        }
+
+        private static bool IsPlayerTurn(ResultReply gameState)
+        {
+            return gameState.CurrentTurnC.Equals(gameState.PlayerTurnC);
+        }
+
+        private static bool IsServerTurn(ResultReply gameState)
+        {
+            return !(gameState.CurrentTurnC.Equals(gameState.PlayerTurnC));
         }
 
         /// <summary>
@@ -106,9 +120,9 @@ namespace SyncTTTClient
         /// then immediaitely displays it to the screen.
         /// </summary>
         /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
-        private static void DisplayGameBoard(SocketFacade serverSocket) {
-            string gameBoardString = serverSocket.ReadData();
-            Console.WriteLine(gameBoardString);
+        private static void DisplayGameBoard(TicTacToe.TicTacToeClient server, string playerId) {
+            BoardReply boardReply = server.GetBoard(new BoardRequest() { PlayerId = playerId });
+            Console.WriteLine(boardReply.GameBoard);
         }
 
         /// <summary>
@@ -118,19 +132,40 @@ namespace SyncTTTClient
         /// player's input.
         /// </summary>
         /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
-        private static void PlayerMove(SocketFacade serverSocket) {
-            string serverResponse = String.Empty;
+        private static void PlayerMove(TicTacToe.TicTacToeClient server, string playerId) {
+            bool isInputAcceptable = false;
+            PlayerTurnRequest request;
+            PlayerTurnReply reply;
 
-            while (!serverResponse.Equals(ProgramMeta.INPUT_ACCEPTED))
+            while (!isInputAcceptable)
             {
-                // Send the data through the socket
-                serverResponse = serverSocket.ReadData();
-                if (!serverResponse.Equals(ProgramMeta.INPUT_ACCEPTED))
+                Console.WriteLine($"Please enter the row and column, seperated by a single space, to place your piece onto the board.");
+
+                try {
+                    string[] coordsParts = Console.ReadLine().Split(" ");
+                    int row = int.Parse(coordsParts[0]);
+                    int column = int.Parse(coordsParts[1]);
+
+                    request = new PlayerTurnRequest();
+                    request.PlayerId = playerId;
+                    request.Row = row;
+                    request.Column = column;
+
+                    reply = server.PlayerTurn(request);
+                    isInputAcceptable = reply.InputWasAccepted;
+                }
+                catch (IndexOutOfRangeException) {
+                    continue;
+                }
+                catch (FormatException)
                 {
-                    Console.WriteLine(serverResponse);
-                    serverSocket.SendData(Console.ReadLine());
+                    continue;
                 }
             }
+        }
+
+        private static void ClearScreen() {
+            Console.Clear();
         }
 
         /// <summary>
@@ -138,22 +173,17 @@ namespace SyncTTTClient
         /// then immediately prints that result to the console.
         /// </summary>
         /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
-        private static void DisplayResults(SocketFacade serverSocket) {
-            try
-            {
-                char finalResult = serverSocket.ReadData()[0];
+        private static void DisplayResults(TicTacToe.TicTacToeClient server, string playerId) {
+            ResultReply result = server.GetResult(new ResultRequest() { PlayerId = playerId });
+            char finalResult = result.ResultC[0];
 
-                if(finalResult == 'D')
-                {
-                     Console.WriteLine("No Winner.");
-                }
-                else
-                {
-                    Console.WriteLine(finalResult + " Wins!");
-                }
+            if(finalResult == 'D')
+            {
+                    Console.WriteLine("No Winner.");
             }
-            catch (IndexOutOfRangeException ie) {
-                Console.Error.WriteLine("The server sent an empty string back as the final results of the game.");
+            else
+            {
+                Console.WriteLine(finalResult + " Wins!");
             }
         }
     }

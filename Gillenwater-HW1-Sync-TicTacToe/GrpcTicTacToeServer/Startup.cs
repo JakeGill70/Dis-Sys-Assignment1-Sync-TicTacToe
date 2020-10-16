@@ -31,7 +31,7 @@ namespace GrpcTicTacToeServer
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<GreeterService>();
+                endpoints.MapGrpcService<TicTacToeService>();
 
                 endpoints.MapGet("/", async context =>
                 {

@@ -16,4 +16,9 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.24.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SharedResources\SharedResources.csproj" />
+    <ProjectReference Include="..\SyncTTTServer\SyncTTTServer.csproj" />
+  </ItemGroup>
+
 </Project>

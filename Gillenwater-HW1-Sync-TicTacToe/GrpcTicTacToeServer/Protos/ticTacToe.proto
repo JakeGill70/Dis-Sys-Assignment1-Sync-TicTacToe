@@ -8,8 +8,10 @@ package ticTacToe;
 service TicTacToe {
   // Sends a greeting
   rpc SetPlayerCharacter (SetPlayerRequest) returns (SetPlayerReply);
-  rpc PlayerTurn (PlayerTurnRequest) returns (PlayerTurnRequest);
+  rpc PlayerTurn (PlayerTurnRequest) returns (PlayerTurnReply);
   rpc ServerTurn (ServerTurnRequest) returns (ServerTurnReply);
+  rpc GetBoard (BoardRequest) returns (BoardReply);
+  rpc GetResult (ResultRequest) returns (ResultReply);
 }
 
 message SetPlayerRequest {
@@ -23,27 +25,41 @@ message SetPlayerReply {
 }
 
 message PlayerTurnRequest{
-    string gameBoard = 1;
-    string playerTurn_c = 2;
-    int32 row = 3;
-    int32 column = 4;
+    string playerId = 1;
+    int32 row = 2;
+    int32 column = 3;
 }
 
 message PlayerTurnReply {
     bool inputWasAccepted = 1;
-    string gameBoard = 2;
-    string turnResult_c = 3;
-    string message = 4;
-}
-
-message ServerTurnRequest{
-    string gameBoard = 1;
-    string playerTurn_c = 2;
-}
-
-message ServerTurnReply{
-    string gameBoard = 1;
     string turnResult_c = 2;
     string message = 3;
 }
 
+message ServerTurnRequest{
+    string playerId = 1;
+    string playerTurn_c = 2;
+}
+
+message ServerTurnReply{
+    string turnResult_c = 1;
+    string message = 2;
+}
+
+message BoardRequest{
+    string playerId = 1;
+}
+
+message BoardReply{
+    string gameBoard = 1;
+}
+
+message ResultRequest{
+    string playerId = 1;
+}
+
+message ResultReply{
+    string result_c = 1;
+    string playerTurn_c = 2;
+    string currentTurn_c = 3;
+}

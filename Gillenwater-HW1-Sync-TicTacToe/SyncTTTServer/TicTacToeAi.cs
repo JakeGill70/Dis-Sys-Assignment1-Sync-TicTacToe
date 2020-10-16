@@ -7,7 +7,7 @@ namespace SyncTTTServer
     /// <summary>
     /// A faux player for the server to use to play tic-tac-toe against human client players.
     /// </summary>
-    class TicTacToeAi
+    public class TicTacToeAi
     {
         /// <summary>
         /// A publically facing method call that calls for this faux player to make a move.
