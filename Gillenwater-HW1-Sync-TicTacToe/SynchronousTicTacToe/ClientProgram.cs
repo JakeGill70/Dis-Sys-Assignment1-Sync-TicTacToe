@@ -50,9 +50,10 @@ namespace SyncTTTClient
         /// </summary>
         /// <param name="server">A reference to the Socket Facade connecting to the server.</param>
         /// <returns>The player's ID for this game session</returns>
-        private static string  StartNewGame(TicTacToe.TicTacToeClient server) {
+        private static string StartNewGame(TicTacToe.TicTacToeClient server)
+        {
             bool isInputAcceptable = false;
-            SetPlayerRequest request = new SetPlayerRequest() { RequestedPlayerPiece="N"};
+            SetPlayerRequest request = new SetPlayerRequest() { RequestedPlayerPiece = "N" };
             SetPlayerReply reply = server.SetPlayerCharacter(request);
 
             while (!isInputAcceptable)
@@ -71,16 +72,19 @@ namespace SyncTTTClient
         /// from the server to facilitate a game of tic-tac-toe.
         /// </summary>
         /// <param name="server">A reference to the Socket Facade connecting to the server.</param>
-        private static void PlayGame(TicTacToe.TicTacToeClient server) {
+        private static void PlayGame(TicTacToe.TicTacToeClient server)
+        {
             // Set the character that the human player would like to play as: X or O
             // I.e. Communicate with the server to tell it what the human client wants to play as
             string myId = StartNewGame(server);
             ResultReply gameStateResult;
 
-            while (true) {
+            while (true)
+            {
                 // Get instructions from the server
                 gameStateResult = server.GetResult(new ResultRequest() { PlayerId = myId });
 
+                // Display only the latest game state information from the server
                 ClearScreen();
                 DisplayGameBoard(server, myId);
 
@@ -95,21 +99,38 @@ namespace SyncTTTClient
                 }
                 else if (IsServerTurn(gameStateResult))
                 {
+                    // Write a saying that the game is waiting for the server to make its turn.
                     Console.WriteLine("The server is making its turn...");
                     server.ServerTurn(new ServerTurnRequest() { PlayerId = myId });
                 }
             }
         }
 
-        private static bool IsGameOver(ResultReply gameState) {
+        /// <summary>
+        /// Determines if the game is over based on the game state from the server.
+        /// </summary>
+        /// <param name="gameState">Should be the most recent game state from the server.</param>
+        /// <returns>True if the player or server has won the game, or there are no more valid moves.</returns>
+        private static bool IsGameOver(ResultReply gameState)
+        {
             return !(gameState.ResultC.Equals("N"));
         }
 
+        /// <summary>
+        /// Determines if it is the player's turn based on the game state from the server.
+        /// </summary>
+        /// <param name="gameState">Should be the most recent game state from the server.</param>
+        /// <returns>True if the next character's turn is the player's character.</returns>
         private static bool IsPlayerTurn(ResultReply gameState)
         {
             return gameState.CurrentTurnC.Equals(gameState.PlayerTurnC);
         }
 
+        /// <summary>
+        /// Determines if it is the server's turn based on the game state from the server.
+        /// </summary>
+        /// <param name="gameState">Should be the most recent game state from the server.</param>
+        /// <returns>True if the next character's turn is not the player's character.</returns>
         private static bool IsServerTurn(ResultReply gameState)
         {
             return !(gameState.CurrentTurnC.Equals(gameState.PlayerTurnC));
@@ -120,7 +141,8 @@ namespace SyncTTTClient
         /// then immediaitely displays it to the screen.
         /// </summary>
         /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
-        private static void DisplayGameBoard(TicTacToe.TicTacToeClient server, string playerId) {
+        private static void DisplayGameBoard(TicTacToe.TicTacToeClient server, string playerId)
+        {
             BoardReply boardReply = server.GetBoard(new BoardRequest() { PlayerId = playerId });
             Console.WriteLine(boardReply.GameBoard);
         }
@@ -132,39 +154,57 @@ namespace SyncTTTClient
         /// player's input.
         /// </summary>
         /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
-        private static void PlayerMove(TicTacToe.TicTacToeClient server, string playerId) {
+        private static void PlayerMove(TicTacToe.TicTacToeClient server, string playerId)
+        {
+            // Create some local variables used inside of the loop below
             bool isInputAcceptable = false;
             PlayerTurnRequest request;
             PlayerTurnReply reply;
 
             while (!isInputAcceptable)
             {
+                // Prompt the user for valid input
                 Console.WriteLine($"Please enter the row and column, seperated by a single space, to place your piece onto the board.");
 
-                try {
+                // Attempt to parse the user's input for a valid Row and Column
+                try
+                {
+                    // Get user input
                     string[] coordsParts = Console.ReadLine().Split(" ");
+                    // Attempt to parse input
                     int row = int.Parse(coordsParts[0]);
                     int column = int.Parse(coordsParts[1]);
 
+                    // Create a request for the server
                     request = new PlayerTurnRequest();
                     request.PlayerId = playerId;
                     request.Row = row;
                     request.Column = column;
 
+                    // Send the request to the server
                     reply = server.PlayerTurn(request);
+
+                    // Check if the input was valid
                     isInputAcceptable = reply.InputWasAccepted;
                 }
-                catch (IndexOutOfRangeException) {
+                catch (IndexOutOfRangeException)
+                {
+                    // Continue to prompt for input if the user did not include a space in their input.
                     continue;
                 }
                 catch (FormatException)
                 {
+                    // Continue to prompt for input if the user did not use valid integers in their input.
                     continue;
                 }
             }
         }
 
-        private static void ClearScreen() {
+        /// <summary>
+        /// Clears the console of any text.
+        /// </summary>
+        private static void ClearScreen()
+        {
             Console.Clear();
         }
 
@@ -173,13 +213,14 @@ namespace SyncTTTClient
         /// then immediately prints that result to the console.
         /// </summary>
         /// <param name="serverSocket">A reference to the Socket Facade connecting to the server.</param>
-        private static void DisplayResults(TicTacToe.TicTacToeClient server, string playerId) {
+        private static void DisplayResults(TicTacToe.TicTacToeClient server, string playerId)
+        {
             ResultReply result = server.GetResult(new ResultRequest() { PlayerId = playerId });
             char finalResult = result.ResultC[0];
 
-            if(finalResult == 'D')
+            if (finalResult == 'D')
             {
-                    Console.WriteLine("No Winner.");
+                Console.WriteLine("No Winner.");
             }
             else
             {
@@ -187,5 +228,6 @@ namespace SyncTTTClient
             }
         }
     }
+
 }
 

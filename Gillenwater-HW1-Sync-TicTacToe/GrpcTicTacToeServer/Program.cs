@@ -8,6 +8,10 @@ using Microsoft.Extensions.Hosting;
 
 namespace GrpcTicTacToeServer
 {
+    /// <summary>
+    /// Generated code.
+    /// Entry point for the server, resposible for ensure the TicTacToeService is initialized.
+    /// </summary>
     public class Program
     {
         public static void Main(string[] args)
